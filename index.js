@@ -44,7 +44,7 @@ client.connect(err => {
                 res.status(200).send(documents)
               })
           }
-          else{
+          else {
             res.status(401).send("unathorised ACCESS")
           }
         })
@@ -53,7 +53,7 @@ client.connect(err => {
         });
 
     }
-    else{
+    else {
       res.status(401).send("unathorised ACCESS")
     }
   })
