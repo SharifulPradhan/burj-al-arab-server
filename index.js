@@ -13,7 +13,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const uri = "mongodb+srv://arabian:burjAlArab7089@cluster0.zvgp5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+import uri from "./mongoDBURI"
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
@@ -28,10 +28,13 @@ client.connect(err => {
 
   app.get('/bookings', (req, res) => {
     console.log(req.headers.authorization);
-    collection.find({email: req.query.email})
-    .toArray((err, documents) => {
-      res.send(documents)
-    })
+
+
+
+    // collection.find({email: req.query.email})
+    // .toArray((err, documents) => {
+    //   res.send(documents)
+    // })
   })
 });
 
