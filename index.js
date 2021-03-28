@@ -3,7 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser')
 const MongoClient = require('mongodb').MongoClient;
 const admin = require("firebase-admin");
-const serviceAccount = require("service-account-file.json");
+const serviceAccount = require("./service-account-file.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -13,7 +13,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-import uri from "./mongoDBURI"
+const uri = "mongodb+srv://arabian:burjAlArab7089@cluster0.zvgp5.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
@@ -21,20 +21,39 @@ client.connect(err => {
   app.post("/addBooking", (req, res) => {
     const newBooking = req.body;
     collection.insertOne(newBooking)
-    .then(result =>{
-      res.send(result.insertedCount > 0);
-    })
+      .then(result => {
+        res.send(result.insertedCount > 0);
+      })
   })
 
   app.get('/bookings', (req, res) => {
-    console.log(req.headers.authorization);
+    const bearer = req.headers.authorization
+    if (bearer && bearer.startsWith('Bearer ')) {
+      const idToken = bearer.split(' ')[1];
+      console.log("bearer ID TOKEN:::", idToken);
+      admin.auth().verifyIdToken(idToken)
+        .then((decodedToken) => {
+          const tokenEmail = decodedToken.email;
+          const queryEmail = req.query.email;
+          console.log(tokenEmail, queryEmail);
+          if (tokenEmail == queryEmail) {
+            collection.find({ email: req.query.email })
+              .toArray((err, documents) => {
+                res.status(200).send(documents)
+              })
+          }
+          else{
+            res.status(401).send("unathorised ACCESS")
+          }
+        })
+        .catch((error) => {
+          res.status(401).send("unathorised ACCESS")
+        });
 
-
-
-    // collection.find({email: req.query.email})
-    // .toArray((err, documents) => {
-    //   res.send(documents)
-    // })
+    }
+    else{
+      res.status(401).send("unathorised ACCESS")
+    }
   })
 });
 
